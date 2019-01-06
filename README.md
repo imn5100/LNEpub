@@ -1,2 +1,2 @@
-# lLNEpub
+# LNEpub
 Light novel epub
