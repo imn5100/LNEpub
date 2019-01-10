@@ -20,7 +20,7 @@ from wenku8 import Wenku8HtmlParser, Wenku8Res2File
 #         epubfile.write(os.path.join(d, f))
 # epubfile.close()
 
-base_url = 'https://www.wenku8.net/novel/2/2255/'
+base_url = 'https://www.wenku8.net/novel/2/2482/'
 
 resp = requests.get(base_url + "index.htm")
 resp.encoding = 'gbk'
