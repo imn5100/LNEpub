@@ -94,33 +94,24 @@ def download(url, prefix='', path=None, override=False):
 def manage_img(path, res):
     epub_resource = []
     urls = res['imgs']
+    is_first = True
     for url in urls:
-        epub_resource.extend(img2xhtml(res, path, url))
+        epub_resource.extend(img2xhtml(res, path, url, is_first))
+        is_first = False
     return epub_resource
 
 
-def cover(res, path, url):
-    epub_resources = []
+def cover(path, url):
     is_jpg = not str(url).endswith('.png')
     file_name = "cover" + ('.png' if not is_jpg else '.jpg')
     download(url, path=path + "/OEBPS/Images/" + file_name, override=True)
-    name = 'cover.xhtml'
-    file_content = cover_xhtml_tem % {'id': file_name, 'title': file_name}
-    content_file = codecs.open(path + "/OEBPS/Text/" + name, 'w', encoding='utf-8')
-    content_file.write(file_content)
-    epub_resources.insert(0,
-                          {'id': file_name, 'type': ('image/png' if not is_jpg else 'image/jpeg'),
-                           'href': 'Images/' + file_name,
-                           'title': res['title'],
-                           'spine': False, 'toc': False})
-    epub_resources.insert(0,
-                          {'id': name, 'type': 'application/xhtml+xml', 'href': 'Text/' + name,
-                           'title': res['title'],
-                           'spine': True, 'toc': True})
-    return epub_resources
+    return {'id': file_name, 'type': ('image/png' if not is_jpg else 'image/jpeg'),
+            'href': 'Images/' + file_name,
+            'title': u'封面',
+            'spine': False, 'toc': False}
 
 
-def img2xhtml(res, path, url):
+def img2xhtml(res, path, url, toc=False):
     epub_resources = []
     download(url, prefix=path + "/OEBPS/Images/")
     file_name = os.path.basename(url)
@@ -137,17 +128,20 @@ def img2xhtml(res, path, url):
     content_file.write(file_content)
     epub_resources.append(
         {'id': name, 'type': 'application/xhtml+xml', 'href': 'Text/' + name, 'title': res['title'],
-         'spine': True, 'toc': False})
+         'spine': True, 'toc': toc})
     return epub_resources
 
 
-def res2file(path, resources):
+def res2file(path, resources, cover_url=None):
     epub_resource = []
-    cover_res = None
+    img_res = None
+    if cover_url:
+        epub_resource.insert(0, cover(path, cover_url))
     for res in resources:
         if 'is_image' in res and res.get('is_image'):
-            cover_res = cover(res, path, res['imgs'][0])
-            epub_resource.extend(manage_img(path, res))
+            if cover_url is None:
+                epub_resource.insert(0, cover(path, res['imgs'][0]))
+            img_res = manage_img(path, res)
         else:
             file_content = text_xhtml_tem % res
             name = res['title'] + '.xhtml'
@@ -156,9 +150,8 @@ def res2file(path, resources):
             epub_resource.append(
                 {'id': name, 'type': 'application/xhtml+xml', 'href': 'Text/' + name, 'title': res['title'],
                  'spine': True, 'toc': True})
-    if cover_res:
-        epub_resource.insert(0, cover_res[0])
-        epub_resource.insert(1, cover_res[1])
+    if img_res:
+        epub_resource.extend(img_res)
     no = 0
     for res in epub_resource:
         if 'toc' in res and res['toc']:

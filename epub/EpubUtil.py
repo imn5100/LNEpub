@@ -70,38 +70,6 @@ toc_navPoint_tem = """
 """
 
 
-class DictObj(dict):
-    def __getattr__(self, attr):
-        try:
-            return self[attr]
-        except KeyError:
-            raise AttributeError(r"'JsonDict' object has no attribute '%s'" % attr)
-
-    def __setattr__(self, attr, value):
-        self[attr] = value
-
-
-class Resource(DictObj):
-    def __init__(self):
-        """
-
-        """
-        # id 文件名
-        super(Resource, self).__init__()
-        self.id = 'chapter1.xhtml'
-        # 类型
-        self.type = MEDIA_TYPE.HTML_XML
-        # 文件路径
-        self.href = 'Text/chapter1.xhtml'
-        # 排序
-        self.no = 2
-        self.title = '第一章'
-        # 是否是内容
-        self.spine = True
-        # 是否是目录章
-        self.toc = True
-
-
 class EpubMaker(object):
     def __init__(self, book_info, resources):
         """
@@ -171,7 +139,7 @@ class EpubMaker(object):
 
     def manifest(self):
         return EpubMaker.manage_resources(self.resources, manifest_item_tem,
-                                          '<manifest> <item id="ncx" href="toc.ncx" '
+                                          '<manifest> \n<item id="ncx" href="toc.ncx" '
                                           'media-type="application/x-dtbncx+xml"/>',
                                           '</manifest>')
 

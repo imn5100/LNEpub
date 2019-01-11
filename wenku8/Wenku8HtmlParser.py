@@ -1,6 +1,24 @@
 # -*- coding: utf-8 -*-
+import re
+
 import requests
 from BeautifulSoup import BeautifulSoup
+
+
+def parse_book_htm(html):
+    if not html:
+        return None
+    main = BeautifulSoup(html)
+    content = main.find('div', id='content')
+    tables = content.findAll('table')
+    cover = content.find('img', attrs={'src': re.compile('http(|s)://img.wkcdn.com/image/\S*.(png|jpg)')})
+    description = tables[2].findAll('span', style="font-size:14px;")[1].text
+    index_a = content.find('a', attrs={'href': re.compile('http(|s)://www.wenku8.net/novel/\S*index.htm')})
+    return {
+        'cover_url': cover['src'],
+        'description': description,
+        'index_url': index_a['href']
+    }
 
 
 # https://www.wenku8.net/novel/2/2255/index.htm
@@ -9,7 +27,7 @@ def parse_index(html):
         return None
     main = BeautifulSoup(html)
     title = main.find('div', attrs={'id': 'title'}).text
-    author = main.find('div', attrs={'id': 'info'}).text
+    author = main.find('div', attrs={'id': 'info'}).text.replace(u'作者：', u'')
     books = []
     index_data = {
         'title': title,
@@ -67,6 +85,6 @@ if __name__ == '__main__':
     # resp = requests.get("https://www.wenku8.net/novel/1/1538/index.htm")
     # resp.encoding = 'gbk'
     # print parse_index(resp.text)
-    resp = requests.get("https://www.wenku8.net/novel/0/381/25061.htm")
-    resp.encoding = 'gbk'
-    print (parse_chapter(resp.text))
+    # resp = requests.get("https://www.wenku8.net/book/2255.htm")
+    # resp.encoding = 'gbk'
+    print (parse_book_htm(open('test.html', 'r').read()))
