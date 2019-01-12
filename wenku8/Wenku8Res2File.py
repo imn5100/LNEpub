@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 import codecs
 import os
 import shutil
 
 import requests
 
-text_xhtml_tem = u"""<?xml version="1.0" encoding="utf-8"?>
+text_xhtml_tem = """<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
   "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 
@@ -22,7 +23,7 @@ text_xhtml_tem = u"""<?xml version="1.0" encoding="utf-8"?>
 </html>
 """
 
-img_xhtml_tem = u"""<?xml version="1.0" encoding="utf-8"?>
+img_xhtml_tem = """<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
   "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" xmlns:epub="http://www.idpf.org/2007/ops" xmlns:xml="http://www.w3.org/XML/1998/namespace">
@@ -38,7 +39,7 @@ img_xhtml_tem = u"""<?xml version="1.0" encoding="utf-8"?>
 </html>
 """
 
-cover_xhtml_tem = u"""<?xml version="1.0" encoding="utf-8"?>
+cover_xhtml_tem = """<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
   "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 
@@ -57,27 +58,24 @@ cover_xhtml_tem = u"""<?xml version="1.0" encoding="utf-8"?>
 </html>
 """
 
+description_xhtml_tem = """<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+        "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops"
+      xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="zh-CN">
+<head>
+    <link href="../Styles/style.css" rel="stylesheet" type="text/css"/>
+    <title>简介</title>
+</head>
+<body>
+<div>
+    <h1 class="fzxiyuan color1">简介</h1>
+       %(description)s
+</div>
+</body>
+</html>
+"""
 
-# chapter = {
-#     'title': main.find('div', id='title').text,
-#     'content': str(content),
-#     'imgs': [],
-#     'is_image': False
-#
-# }
-# id 文件名
-# self.id = 'chapter1.xhtml'
-# # 类型
-# self.type = MEDIA_TYPE.HTML_XML
-# # 文件路径
-# self.href = 'Text/chapter1.xhtml'
-# # 排序
-# self.no = 2
-# self.title = '第一章'
-# # 是否是内容
-# self.spine = True
-# # 是否是目录章
-# self.toc = True
 
 def download(url, prefix='', path=None, override=False):
     if not path:
@@ -107,7 +105,7 @@ def cover(path, url):
     download(url, path=path + "/OEBPS/Images/" + file_name, override=True)
     return {'id': file_name, 'type': ('image/png' if not is_jpg else 'image/jpeg'),
             'href': 'Images/' + file_name,
-            'title': u'封面',
+            'title': '封面',
             'spine': False, 'toc': False}
 
 
@@ -132,6 +130,15 @@ def img2xhtml(res, path, url, toc=False):
     return epub_resources
 
 
+def description(path, book_info):
+    file_content = description_xhtml_tem % book_info
+    name = 'description.xhtml'
+    content_file = codecs.open(path + "/OEBPS/Text/" + name, 'w', encoding='utf-8')
+    content_file.write(file_content)
+    return {'id': name, 'type': 'application/xhtml+xml', 'href': 'Text/' + name, 'title': '简介',
+            'spine': True, 'toc': True}
+
+
 def res2file(path, resources, cover_url=None):
     epub_resource = []
     img_res = None
@@ -152,6 +159,10 @@ def res2file(path, resources, cover_url=None):
                  'spine': True, 'toc': True})
     if img_res:
         epub_resource.extend(img_res)
+    return epub_resource
+
+
+def set_no(epub_resource):
     no = 0
     for res in epub_resource:
         if 'toc' in res and res['toc']:

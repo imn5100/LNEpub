@@ -1,12 +1,12 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+
 import codecs
 import datetime
-import os
 import shutil
 import uuid
-from zipfile import ZipFile
+
+from utils import FileUtil
 
 
 class MEDIA_TYPE(object):
@@ -109,15 +109,9 @@ class EpubMaker(object):
         toc_file = codecs.open(self.path + "/OEBPS/toc.ncx", 'w', encoding='utf-8')
         toc = self.toc_header() + self.toc_nav_points() + toc_tail_tem
         toc_file.write(toc)
-
-        epubfile = ZipFile(self.book_info['title'] + '.epub', 'w')
-        os.chdir(self.path + "/")
-        for d, ds, fs in os.walk('.'):
-            for f in fs:
-                epubfile.write(os.path.join(d, f))
-        epubfile.close()
-
-        # shutil.rmtree("../tmp")
+        file_name = FileUtil.zip_path(self.path + "/", self.book_info['title'] + '.epub')
+        shutil.rmtree(self.path)
+        return file_name
 
     def metadata(self):
         meta = """<metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">

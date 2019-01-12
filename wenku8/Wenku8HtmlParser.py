@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
 
-import requests
 from BeautifulSoup import BeautifulSoup
 
 
@@ -12,11 +11,12 @@ def parse_book_htm(html):
     content = main.find('div', id='content')
     tables = content.findAll('table')
     cover = content.find('img', attrs={'src': re.compile('http(|s)://img.wkcdn.com/image/\S*.(png|jpg)')})
-    description = tables[2].findAll('span', style="font-size:14px;")[1].text
+    description_span = tables[2].findAll('span', style="font-size:14px;")[1]
+    del description_span['style']
     index_a = content.find('a', attrs={'href': re.compile('http(|s)://www.wenku8.net/novel/\S*index.htm')})
     return {
         'cover_url': cover['src'],
-        'description': description,
+        'description': unicode(description_span),
         'index_url': index_a['href']
     }
 
