@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 import time
 import uuid
 
@@ -38,7 +40,11 @@ def req(url):
     raise RuntimeError("request fail")
 
 
-base_url = 'https://www.wenku8.net/book/2255.htm'
+# 需要下载的单行本名称列表，全部下载则未空
+single_book_list = ['第一卷']
+# 小说主页
+base_url = 'https://www.wenku8.net/book/2492.htm'
+
 print ('Get book info...')
 book_info = Wenku8HtmlParser.parse_book_htm(req(base_url))
 print (book_info)
@@ -57,6 +63,8 @@ book_info['source'] = 'www.wenku8.net'
 
 print ('Get book chapters...')
 for single_book in index_data.get('books'):
+    if len(single_book_list) > 0 and single_book['book_title'] not in single_book_list:
+        continue
     chapters = []
     for chapter in single_book.get('chapters'):
         chapters.append(Wenku8HtmlParser.parse_chapter(req(chapter_base_url + chapter.get('link'))))
