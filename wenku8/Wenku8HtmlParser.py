@@ -10,12 +10,12 @@ def parse_book_htm(html):
     main = BeautifulSoup(html)
     content = main.find('div', id='content')
     tables = content.findAll('table')
-    cover = content.find('img', attrs={'src': re.compile('http(|s)://img.wkcdn.com/image/\S*.(png|jpg)')})
+    # cover = content.find('img', attrs={'src': re.compile('http(|s)://img.wenku8.com/image/\S*.(png|jpg)')})
     description_span = tables[2].findAll('span', style="font-size:14px;")[1]
     del description_span['style']
     index_a = content.find('a', attrs={'href': re.compile('http(|s)://www.wenku8.net/novel/\S*index.htm')})
     return {
-        'cover_url': cover['src'],
+        # 'cover_url': cover['src'],
         'description': unicode(description_span),
         'index_url': index_a['href']
     }
